@@ -6,12 +6,15 @@ let
       services.beegfsEnable = true;
       services.beegfs.default = {
         mgmtdHost = "mgmt";
-        client.enable = true;
+        client = {
+          mount = false; 
+          enable = true;
+        };
       };
       
       fileSystems = pkgs.lib.mkVMOverride # FIXME: this should be creatd by the module
         [ { mountPoint = "/beegfs";
-            device = "beegfs_nodev";
+            device = "default";
             fsType = "beegfs";
             options = [ "cfgFile=/etc/beegfs/beegfs-client-default.conf" "_netdev" ];
           }
@@ -22,14 +25,14 @@ let
   server = service : { config, pkgs, lib, ... } : {
       networking.firewall.enable = false;
       boot.initrd.postDeviceCommands = ''
-        ${pkgs.e2fsprogs}/bin/mkfs.ext4 -L aux /dev/vdb
+        ${pkgs.e2fsprogs}/bin/mkfs.ext4 -L data /dev/vdb
       '';
 
       virtualisation.emptyDiskImages = [ 4096 ];
 
       fileSystems = pkgs.lib.mkVMOverride
         [ { mountPoint = "/data";
-            device = "/dev/disk/by-label/aux";
+            device = "/dev/disk/by-label/data";
             fsType = "ext4";
           }
         ];
@@ -77,6 +80,7 @@ in
     $client1->succeed("echo test > /beegfs/test");
     $client2->waitForUnit("beegfs.mount");
     $client2->succeed("test -e /beegfs/test");
+    $client2->succeed("cat /beegfs/test | grep test");
   '';
 })
     
