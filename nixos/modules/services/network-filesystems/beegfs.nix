@@ -16,7 +16,7 @@ let
   '';
 
   configAdmon = name: cfg: pkgs.writeText "beegfs-admon-${name}.conf" ''
-    sysMgmtdHost = ${cfg.mgmtHost}
+    sysMgmtdHost = ${cfg.mgmtdHost}
     connPortShift = ${toString cfg.connPortShift}
     
     ${cfg.admon.extraConfig}
@@ -24,7 +24,7 @@ let
 
   configMeta = name: cfg: pkgs.writeText "beegfs-meta-${name}.conf" ''
     storeMetaDirectory = ${cfg.meta.storeDir}
-    sysMgmtdHost = ${cfg.mgmtHost}
+    sysMgmtdHost = ${cfg.mgmtdHost}
     connPortShift = ${toString cfg.connPortShift}
     storeAllowFirstRunInit = false
 
@@ -33,7 +33,7 @@ let
 
   configStorage = name: cfg: pkgs.writeText "beegfs-storage-${name}.conf" ''
     storeStorageDirectory = ${cfg.storage.storeDir}
-    sysMgmtdHost = ${cfg.mgmtHost}
+    sysMgmtdHost = ${cfg.mgmtdHost}
     connPortShift = ${toString cfg.connPortShift}
     storeAllowFirstRunInit = false
 
@@ -45,7 +45,7 @@ let
   '';
 
   configClient = name: cfg: ''
-    sysMgmtdHost = ${cfg.mgmtHost}
+    sysMgmtdHost = ${cfg.mgmtdHost}
     connPortShift = ${toString cfg.connPortShift}
     
     ${cfg.client.extraConfig}
@@ -72,7 +72,7 @@ let
               cfgFile=${cfgFile name cfg} \
               pidFile=/run/beegfs-${service}-${name}.pid
           '';
-          PIDfile = "/run/beegfs-${service}-${name}.pid"; 
+          PIDFile = "/run/beegfs-${service}-${name}.pid"; 
           TimeoutStopSec = "300";
         };
       }))) cfg);
@@ -90,7 +90,7 @@ let
               cfgFile=${configHelperd name cfg} \
               pidFile=/run/beegfs-helperd-${name}.pid
           '';
-          PIDfile = "/run/beegfs-helperd-${name}.pid"; 
+          PIDFile = "/run/beegfs-helperd-${name}.pid"; 
           TimeoutStopSec = "300";
         };
       }))) cfg;
@@ -112,13 +112,20 @@ in
         type = with types; attrsOf (submodule ({ config, ... } : {
 
         options = {      
-        mgmtHost = mkOption {
+        mgmtdHost = mkOption {
           type = types.str;
           default = null;
           example = "master";
           description = ''Hostname of managament host'';  
         };
-   
+  
+        connAuthFileSource = mkOption {
+          type = types.str;
+          default = null;
+          example = "./my.key";
+          description = ''Source file containing shared secret authentication'';  
+        };
+
         connPortShift = mkOption {
           type = types.int;
           default = 0;
@@ -281,7 +288,7 @@ in
           )
       {
         kernelModules = [ "beegfs" ];
-        extraModulePackages = [ pkgs.beegfs-module ];
+        extraModulePackages = [ pkgs.linuxPackages.beegfs-module ];
       };
 
 
