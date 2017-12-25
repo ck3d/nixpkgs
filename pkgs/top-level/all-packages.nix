@@ -1340,6 +1340,8 @@ with pkgs;
 
   beanstalkd = callPackage ../servers/beanstalkd { };
 
+  beegfs = callPackage ../os-specific/linux/beegfs { };
+
   beets = callPackage ../tools/audio/beets {
     pythonPackages = python2Packages;
   };
@@ -12801,6 +12803,8 @@ with pkgs;
     bcc = callPackage ../os-specific/linux/bcc { };
 
     bbswitch = callPackage ../os-specific/linux/bbswitch {};
+
+    beegfs-module = callPackage ../os-specific/linux/beegfs/kernel-module.nix { };
 
     ati_drivers_x11 = callPackage ../os-specific/linux/ati-drivers { };
 
