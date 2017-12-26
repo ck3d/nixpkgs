@@ -49,51 +49,58 @@ in stdenv.mkDerivation rec {
   '';
 
   installPhase = ''
-    mkdir -p $out/bin $out/lib $out/share/doc $out/include
+    binDir=$out/bin
+    docDir=$out/share/doc/beegfs
+    includeDir=$out/include/beegfs
+    libDir=$out/lib
+    libDirPkg=$out/lib/beegfs
 
-    cp beegfs_admon/build/beegfs-admon $out/bin 
-    cp beegfs_admon/build/dist/usr/bin/beegfs-admon-gui $out/bin 
-    cp beegfs_admon_gui/dist/beegfs-admon-gui.jar $out/lib
-    cp beegfs_admon/build/dist/etc/beegfs-admon.conf $out/share/doc
+    mkdir -p $binDir $libDir $libDirPkg $docDir $includeDir
 
-    cp beegfs_java_lib/build/jbeegfs.jar $out/lib
-    cp beegfs_java_lib/build/libjbeegfs.so $out/lib
+    cp beegfs_admon/build/beegfs-admon $binDir
+    cp beegfs_admon/build/dist/usr/bin/beegfs-admon-gui $binDir 
+    cp beegfs_admon_gui/dist/beegfs-admon-gui.jar $libDirPkg
+    cp beegfs_admon/build/dist/etc/beegfs-admon.conf $docDir
 
-    cp beegfs_ctl/build/beegfs-ctl $out/bin
-    cp beegfs_fsck/build/beegfs-fsck $out/bin
+    cp beegfs_java_lib/build/jbeegfs.jar $libDirPkg
+    cp beegfs_java_lib/build/libjbeegfs.so $libDir
 
-    cp beegfs_utils/scripts/beegfs-check-servers $out/bin
-    cp beegfs_utils/scripts/beegfs-df $out/bin
-    cp beegfs_utils/scripts/beegfs-net $out/bin     
+    cp beegfs_ctl/build/beegfs-ctl $binDir
+    cp beegfs_fsck/build/beegfs-fsck $binDir
 
-    cp beegfs_helperd/build/beegfs-helperd $out/bin
-    cp beegfs_helperd/build/dist/etc/beegfs-helperd.conf $out/share/doc
+    cp beegfs_utils/scripts/beegfs-check-servers $binDir
+    cp beegfs_utils/scripts/beegfs-df $binDir
+    cp beegfs_utils/scripts/beegfs-net $binDir
 
-    cp beegfs_client_module/build/dist/sbin/beegfs-setup-client $out/bin
-    cp beegfs_client_module/build/dist/etc/beegfs-client.conf $out/share/doc 
+    cp beegfs_helperd/build/beegfs-helperd $binDir
+    cp beegfs_helperd/build/dist/etc/beegfs-helperd.conf $docDir
 
-    cp beegfs_meta/build/beegfs-meta $out/bin
-    cp beegfs_meta/build/dist/sbin/beegfs-setup-meta $out/bin
-    cp beegfs_meta/build/dist/etc/beegfs-meta.conf $out/share/doc
+    cp beegfs_client_module/build/dist/sbin/beegfs-setup-client $binDir
+    cp beegfs_client_module/build/dist/etc/beegfs-client.conf $docDir
 
-    cp beegfs_mgmtd/build/beegfs-mgmtd $out/bin
-    cp beegfs_mgmtd/build/dist/sbin/beegfs-setup-mgmtd $out/bin
-    cp beegfs_mgmtd/build/dist/etc/beegfs-mgmtd.conf $out/share/doc
+    cp beegfs_meta/build/beegfs-meta $binDir
+    cp beegfs_meta/build/dist/sbin/beegfs-setup-meta $binDir
+    cp beegfs_meta/build/dist/etc/beegfs-meta.conf $docDir
 
-    cp beegfs_storage/build/beegfs-storage $out/bin
-    cp beegfs_storage/build/dist/sbin/beegfs-setup-storage $out/bin
-    cp beegfs_storage/build/dist/etc/beegfs-storage.conf $out/share/doc
+    cp beegfs_mgmtd/build/beegfs-mgmtd $binDir
+    cp beegfs_mgmtd/build/dist/sbin/beegfs-setup-mgmtd $binDir
+    cp beegfs_mgmtd/build/dist/etc/beegfs-mgmtd.conf $docDir
 
-    cp beegfs_opentk_lib/build/libbeegfs-opentk.so $out/lib
+    cp beegfs_storage/build/beegfs-storage $binDir
+    cp beegfs_storage/build/dist/sbin/beegfs-setup-storage $binDir
+    cp beegfs_storage/build/dist/etc/beegfs-storage.conf $docDir
 
-    cp -r beegfs_client_devel/include/* $out/include
+    cp beegfs_opentk_lib/build/libbeegfs-opentk.so $libDir
+
+    cp beegfs_client_devel/dist/usr/share/doc/beegfs-client-devel/examples/* $docDir
+    cp -r beegfs_client_devel/include/* $includeDir
   '';
 
   postFixup = ''
     substituteInPlace $out/bin/beegfs-admon-gui \
       --replace " java " " ${jre}/bin/java " \
       --replace "/opt/beegfs/beegfs-admon-gui/beegfs-admon-gui.jar" \
-                "$out/lib/beegfs-admon-gui.jar"
+                "$libDirPkg/beegfs-admon-gui.jar"
   '';
 
   doCheck = true;
