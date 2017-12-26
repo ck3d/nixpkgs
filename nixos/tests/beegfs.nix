@@ -111,7 +111,7 @@ in
     $client1->succeed("dd if=/dev/urandom bs=1M count=10 of=/beegfs/striped");
     $client2->succeed("cat /beegfs/striped > /dev/null");
 
-    # text if fs is still healthy
+    # check if fs is still healthy
     $client1->succeed("beegfs-fsck --checkfs --cfgFile=/etc/beegfs/client-default.conf");
   '';
 })

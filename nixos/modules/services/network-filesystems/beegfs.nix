@@ -284,7 +284,7 @@ in
               default = null;
               example = "/data/beegfs-storage";
               description = ''
-                Data directory for storage service.
+                Data directories for storage service.
                 Must not be shared with other beegfs daemons.
                 The underlying filesystem must be mounted with xattr turned on.
                 This directory must exist and it must be initialized
