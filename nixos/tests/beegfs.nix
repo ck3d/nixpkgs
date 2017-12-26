@@ -19,7 +19,7 @@ let
       [ { mountPoint = "/beegfs";
           device = "default";
           fsType = "beegfs";
-          options = [ "cfgFile=/etc/beegfs/beegfs-client-default.conf" "_netdev" ];
+          options = [ "cfgFile=/etc/beegfs/client-default.conf" "_netdev" ];
         }
       ];
 
@@ -101,7 +101,7 @@ in
 
     # Basic test 
     $client1->waitForUnit("beegfs.mount");
-    $client1->succeed("beegfs-check-servers -c /etc/beegfs/beegfs-client-default.conf");
+    $client1->succeed("beegfs-check-servers -c /etc/beegfs/client-default.conf");
     $client1->succeed("echo test > /beegfs/test");
     $client2->waitForUnit("beegfs.mount");
     $client2->succeed("test -e /beegfs/test");
@@ -112,7 +112,7 @@ in
     $client2->succeed("cat /beegfs/striped > /dev/null");
 
     # text if fs is still healthy
-    $client1->succeed("beegfs-fsck --checkfs --cfgFile=/etc/beegfs/beegfs-client-default.conf");
+    $client1->succeed("beegfs-fsck --checkfs --cfgFile=/etc/beegfs/client-default.conf");
   '';
 })
     

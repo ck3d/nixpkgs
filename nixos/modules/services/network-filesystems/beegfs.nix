@@ -7,7 +7,7 @@ let
 
   # functions for the generations of config files
   
-  configMgmtd = name: cfg: pkgs.writeText "beegfs-mgmt-${name}.conf" ''
+  configMgmtd = name: cfg: pkgs.writeText "mgmt-${name}.conf" ''
     storeMgmtdDirectory = ${cfg.mgmtd.storeDir}
     storeAllowFirstRunInit = false
     connAuthFile = ${cfg.connAuthFile}
@@ -16,7 +16,7 @@ let
     ${cfg.mgmtd.extraConfig}
   '';
 
-  configAdmon = name: cfg: pkgs.writeText "beegfs-admon-${name}.conf" ''
+  configAdmon = name: cfg: pkgs.writeText "admon-${name}.conf" ''
     sysMgmtdHost = ${cfg.mgmtdHost}
     connAuthFile = ${cfg.connAuthFile}
     connPortShift = ${toString cfg.connPortShift}
@@ -24,7 +24,7 @@ let
     ${cfg.admon.extraConfig}
   '';
 
-  configMeta = name: cfg: pkgs.writeText "beegfs-meta-${name}.conf" ''
+  configMeta = name: cfg: pkgs.writeText "meta-${name}.conf" ''
     storeMetaDirectory = ${cfg.meta.storeDir}
     sysMgmtdHost = ${cfg.mgmtdHost}
     connAuthFile = ${cfg.connAuthFile}
@@ -34,7 +34,7 @@ let
     ${cfg.mgmtd.extraConfig}
   '';
 
-  configStorage = name: cfg: pkgs.writeText "beegfs-storage-${name}.conf" ''
+  configStorage = name: cfg: pkgs.writeText "storage-${name}.conf" ''
     storeStorageDirectory = ${cfg.storage.storeDir}
     sysMgmtdHost = ${cfg.mgmtdHost}
     connAuthFile = ${cfg.connAuthFile}
@@ -44,12 +44,12 @@ let
     ${cfg.storage.extraConfig}
   '';
 
-  configHelperd = name: cfg: pkgs.writeText "beegfs-helperd-${name}.conf" ''
+  configHelperd = name: cfg: pkgs.writeText "helperd-${name}.conf" ''
     connAuthFile = ${cfg.connAuthFile}
     ${cfg.helperd.extraConfig}
   '';
 
-  configClientFilename = name : "/etc/beegfs/beegfs-client-${name}.conf";
+  configClientFilename = name : "/etc/beegfs/client-${name}.conf";
 
   configClient = name: cfg: ''
     sysMgmtdHost = ${cfg.mgmtdHost}
@@ -87,7 +87,7 @@ let
   }))) cfg);
 
   systemdHelperd =  mapAttrs' ( name: cfg:
-    (nameValuePair "beegfsHelperd-${name}" (mkIf cfg.client.enable {
+    (nameValuePair "beegfs-helperd-${name}" (mkIf cfg.client.enable {
     path = with pkgs; [ beegfs ];
     wantedBy = [ "multi-user.target" ];
     requires = [ "network-online.target" ];
@@ -156,7 +156,7 @@ in
           connAuthFile = mkOption {
             type = types.str;
             default = null;
-            example = "./my.key";
+            example = "/etc/my.key";
             description = "File containing shared secret authentication";  
           };
  
@@ -317,7 +317,7 @@ in
     # Put the client.conf files in /etc since they are needed
     # by the commandline need them 
     environment.etc = mapAttrs' ( name: cfg:
-      (nameValuePair "beegfs/beegfs-client-${name}.conf" (mkIf (cfg.client.enable)
+      (nameValuePair "beegfs/client-${name}.conf" (mkIf (cfg.client.enable)
     {
       enable = true;
       text = configClient name cfg;
