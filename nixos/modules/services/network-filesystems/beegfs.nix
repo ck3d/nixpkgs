@@ -49,6 +49,8 @@ let
     ${cfg.helperd.extraConfig}
   '';
 
+  configClientFilename = name : "/etc/beegfs/beegfs-client-${name}.conf";
+
   configClient = name: cfg: ''
     sysMgmtdHost = ${cfg.mgmtdHost}
     connAuthFile = ${cfg.connAuthFile}
@@ -102,7 +104,34 @@ let
     };
    }))) cfg;
 
+  utilWrappers = mapAttrsToList ( name: cfg:
+      pkgs.stdenv.mkDerivation {
+        name = "beegfs-utils-${name}";
+        phases = [ "installPhase" ];
+        buildInputs = [ pkgs.beegfs ];
+        installPhase = ''
+          mkdir -p $out/bin
 
+          echo "creating wrappers in $out"
+          cat << EOF > $out/bin/beegfs-ctl-${name}
+          #!${pkgs.stdenv.shell}
+          ${pkgs.beegfs}/bin/beegfs-ctl --cfgFile=${configClientFilename name} \$@
+          EOF
+          chmod +x $out/bin/beegfs-ctl-${name}
+
+          cat << EOF > $out/bin/beegfs-check-servers-${name}
+          #!${pkgs.stdenv.shell}
+          ${pkgs.beegfs}/bin/beegfs-check-servers -c ${configClientFilename name} \$@
+          EOF
+          chmod +x $out/bin/beegfs-check-servers-${name}
+
+          cat << EOF > $out/bin/beegfs-df-${name}
+          beegfs-ctl  --cfgFile=${configClientFilename name} \
+            --listtargets --hidenodeid --pools --spaceinfo \$@
+          EOF
+          chmod +x $out/bin/beegfs-df-${name}
+        '';
+    }) cfg;
 in
 {
   ###### interface 
@@ -283,6 +312,8 @@ in
   config = 
     mkIf config.services.beegfsEnable {
 
+    environment.systemPackages = utilWrappers;
+
     # Put the client.conf files in /etc since they are needed
     # by the commandline need them 
     environment.etc = mapAttrs' ( name: cfg:
@@ -307,7 +338,7 @@ in
       device = "beegfs_nodev";
       fsType = "beegfs";
       mountPoint = cfg.client.mountPoint;
-      options = [ "cfgFile=/etc/beegfs/beegfs-client-${name}.conf" "_netdev" ];
+      options = [ "cfgFile=${configClientFilename name}" "_netdev" ];
     }) else {}) )) cfg;
 
     # generate systemd services 
