@@ -10,6 +10,7 @@ let
   configMgmtd = name: cfg: pkgs.writeText "beegfs-mgmt-${name}.conf" ''
     storeMgmtdDirectory = ${cfg.mgmtd.storeDir}
     storeAllowFirstRunInit = false
+    connAuthFile = ${cfg.connAuthFile}
     connPortShift = ${toString cfg.connPortShift}
     
     ${cfg.mgmtd.extraConfig}
@@ -17,6 +18,7 @@ let
 
   configAdmon = name: cfg: pkgs.writeText "beegfs-admon-${name}.conf" ''
     sysMgmtdHost = ${cfg.mgmtdHost}
+    connAuthFile = ${cfg.connAuthFile}
     connPortShift = ${toString cfg.connPortShift}
     
     ${cfg.admon.extraConfig}
@@ -25,6 +27,7 @@ let
   configMeta = name: cfg: pkgs.writeText "beegfs-meta-${name}.conf" ''
     storeMetaDirectory = ${cfg.meta.storeDir}
     sysMgmtdHost = ${cfg.mgmtdHost}
+    connAuthFile = ${cfg.connAuthFile}
     connPortShift = ${toString cfg.connPortShift}
     storeAllowFirstRunInit = false
 
@@ -34,6 +37,7 @@ let
   configStorage = name: cfg: pkgs.writeText "beegfs-storage-${name}.conf" ''
     storeStorageDirectory = ${cfg.storage.storeDir}
     sysMgmtdHost = ${cfg.mgmtdHost}
+    connAuthFile = ${cfg.connAuthFile}
     connPortShift = ${toString cfg.connPortShift}
     storeAllowFirstRunInit = false
 
@@ -41,11 +45,13 @@ let
   '';
 
   configHelperd = name: cfg: pkgs.writeText "beegfs-helperd-${name}.conf" ''
+    connAuthFile = ${cfg.connAuthFile}
     ${cfg.helperd.extraConfig}
   '';
 
   configClient = name: cfg: ''
     sysMgmtdHost = ${cfg.mgmtdHost}
+    connAuthFile = ${cfg.connAuthFile}
     connPortShift = ${toString cfg.connPortShift}
     
     ${cfg.client.extraConfig}
@@ -118,11 +124,11 @@ in
             description = ''Hostname of managament host'';  
           };
  
-          connAuthFileSource = mkOption {
+          connAuthFile = mkOption {
             type = types.str;
             default = null;
             example = "./my.key";
-            description = "Source file containing shared secret authentication";  
+            description = "File containing shared secret authentication";  
           };
  
           connPortShift = mkOption {
