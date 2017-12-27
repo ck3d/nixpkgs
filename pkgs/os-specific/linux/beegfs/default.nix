@@ -92,7 +92,7 @@ in stdenv.mkDerivation rec {
 
     cp beegfs_opentk_lib/build/libbeegfs-opentk.so $libDir
 
-    cp beegfs_client_devel/dist/usr/share/doc/beegfs-client-devel/examples/* $docDir
+    cp beegfs_client_devel/build/dist/usr/share/doc/beegfs-client-devel/examples/* $docDir
     cp -r beegfs_client_devel/include/* $includeDir
   '';
 
