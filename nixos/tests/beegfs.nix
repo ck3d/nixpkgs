@@ -23,8 +23,8 @@ let
         }
       ];
 
-    environment.systemPackages = with pkgs; [ beegfs ];
-    environment.etc."${connAuthFile}" = {
+    environment.systemPackages = with pkgs; [ beegfs ]; # should this be done in the beegfs module?
+    environment.etc."${connAuthFile}" = { # I exspect that the secret is visible in nix store for everyone?
       enable = true;
       text = "ThisIsALousySecret";
       mode = "0600";

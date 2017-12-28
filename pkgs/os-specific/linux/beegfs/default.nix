@@ -31,10 +31,12 @@ in stdenv.mkDerivation rec {
     sha256 = "10xs7gzdmlg23k6zn1b7jij3lljn7rr1j6h476hq4lbg981qk3n3";
   };
 
+  # stdenv is a bash, no need to include
   nativeBuildInputs = [ which bash unzip pkgconfig cppunit openjdk ant];
   buildInputs = [ libuuid attr xfsprogs zlib openssl sqlite jre ];
 
   postPatch = ''
+    # patchShebangs does the job for you (I hope also for /bin/true
     find -type f -executable -exec sed -i "s:/bin/bash:${bash}/bin/bash:" \{} \;
     find -type f -name Makefile -exec sed -i "s:/bin/bash:${bash}/bin/bash:" \{} \;
     find -type f -name Makefile -exec sed -i "s:/bin/true:${coreutils}/bin/true:" \{} \;

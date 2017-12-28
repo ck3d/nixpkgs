@@ -14,8 +14,9 @@ in stdenv.mkDerivation {
 
   hardeningDisable = [ "fortify" "pic" "stackprotector" ];
 
-  nativeBuildInputs = [ which bash coreutils kmod ];
+  nativeBuildInputs = [ which bash coreutils kmod ]; # bash and coreutils are already included, which I do not know
   postPatch = ''
+    # have a look to patchShebang
     find -type f -executable -exec sed -i "s:/bin/bash:${bash}/bin/bash:" \{} \;
     find -type f -name Makefile -exec sed -i "s:/bin/bash:${bash}/bin/bash:" \{} \;
     find -type f -name Makefile -exec sed -i "s:/bin/true:${coreutils}/bin/true:" \{} \;
@@ -25,6 +26,7 @@ in stdenv.mkDerivation {
 
   buildPhase = ''
     cd beegfs_client_module/build
+    # you could use buildFlags to pass KDIR to make
     export KDIR=${kernel.dev}/lib/modules/${kernel.modDirVersion}/build/
     make 
   '';

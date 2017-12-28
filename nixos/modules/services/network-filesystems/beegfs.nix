@@ -70,16 +70,16 @@ let
 
   systemdEntry = service: cfgFile: (mapAttrs' ( name: cfg:
     (nameValuePair "beegfs-${service}-${name}" (mkIf cfg."${service}".enable {
-    path = with pkgs; [ beegfs ];
+    path = with pkgs; [ beegfs ]; # does beegfs-service need beegfs in PATH?
     wantedBy = [ "multi-user.target" ];
     requires = [ "network-online.target" ];
     after = [ "network-online.target" ];
     serviceConfig = {
-      Type = "simple";
+      Type = "simple"; # I think not needed, because it is the default
       ExecStart = ''
         ${pkgs.beegfs}/bin/beegfs-${service} \
           cfgFile=${cfgFile name cfg} \
-          pidFile=/run/beegfs-${service}-${name}.pid
+          pidFile=/run/beegfs-${service}-${name}.pid # you can say pidFile=${PIDfile} (but needs rec)
       '';
       PIDFile = "/run/beegfs-${service}-${name}.pid"; 
       TimeoutStopSec = "300";
@@ -88,16 +88,16 @@ let
 
   systemdHelperd =  mapAttrs' ( name: cfg:
     (nameValuePair "beegfs-helperd-${name}" (mkIf cfg.client.enable {
-    path = with pkgs; [ beegfs ];
+    path = with pkgs; [ beegfs ]; # does beegfs-helperd need beegfs in PATH?
     wantedBy = [ "multi-user.target" ];
     requires = [ "network-online.target" ];
     after = [ "network-online.target" ];
     serviceConfig = {
-      Type = "simple";
+      Type = "simple"; # I think not needed, because it is the default
       ExecStart = ''
         ${pkgs.beegfs}/bin/beegfs-helperd \
           cfgFile=${configHelperd name cfg} \
-          pidFile=/run/beegfs-helperd-${name}.pid
+          pidFile=/run/beegfs-helperd-${name}.pid # you can say pidFile=${PIDFile} (but needs rec)
       '';
       PIDFile = "/run/beegfs-helperd-${name}.pid"; 
       TimeoutStopSec = "300";
@@ -105,10 +105,10 @@ let
    }))) cfg;
 
   utilWrappers = mapAttrsToList ( name: cfg:
-      pkgs.stdenv.mkDerivation {
+      pkgs.stdenv.mkDerivation { # have a lock to runCommand
         name = "beegfs-utils-${name}";
         phases = [ "installPhase" ];
-        buildInputs = [ pkgs.beegfs ];
+        buildInputs = [ pkgs.beegfs ]; # not needed
         installPhase = ''
           mkdir -p $out/bin
 
@@ -126,7 +126,7 @@ let
           chmod +x $out/bin/beegfs-check-servers-${name}
 
           cat << EOF > $out/bin/beegfs-df-${name}
-          beegfs-ctl  --cfgFile=${configClientFilename name} \
+          beegfs-ctl  --cfgFile=${configClientFilename name} \ # path to beegfs-ctl is missing
             --listtargets --hidenodeid --pools --spaceinfo \$@
           EOF
           chmod +x $out/bin/beegfs-df-${name}
@@ -146,16 +146,16 @@ in
       '';
       type = with types; attrsOf (submodule ({ config, ... } : {
         options = {      
-          mgmtdHost = mkOption {
+          mgmtdHost = mkOption { # modatory option?
             type = types.str;
-            default = null;
+            default = null; # null is not a string, you could extend type by nullable string or use empty string ""
             example = "master";
             description = ''Hostname of managament host'';  
           };
  
-          connAuthFile = mkOption {
-            type = types.str;
-            default = null;
+          connAuthFile = mkOption { # mandatory option?
+            type = types.str; # there is a type path
+            default = null; # same as above
             example = "/etc/my.key";
             description = "File containing shared secret authentication";  
           };
@@ -179,9 +179,9 @@ in
               description = "Create fstab entry automatically";
             };
  
-            mountPoint = mkOption {
-              type = types.str;
-              default = "/beegfs";
+            mountPoint = mkOption {  # mandatory option?
+              type = types.str; # there is a type called ath
+              default = "/beegfs"; # I think /run/beegfs would be better, but never mind
               description = ''
                 Mount point under which the beegfs filesytem should be mounted.
                 If mounted manually the a mount option specifing the config file
@@ -215,8 +215,8 @@ in
             enable = mkEnableOption "BeeGFS mgmtd daemon";
           
             storeDir = mkOption {
-              type = types.str;
-              default = null;
+              type = types.str; # type path
+              default = null; # madatory option?
               example = "/data/beegfs-mgmtd";
               description = ''
                 Data directory for mgmtd.
@@ -279,7 +279,7 @@ in
           storage = {
             enable = mkEnableOption "BeeGFS storage daemon";
           
-            storeDir = mkOption {
+            storeDir = mkOption { # same comments as above
               type = types.str;
               default = null;
               example = "/data/beegfs-storage";
@@ -312,7 +312,7 @@ in
   config = 
     mkIf config.services.beegfsEnable {
 
-    environment.systemPackages = utilWrappers;
+    environment.systemPackages = utilWrappers; # why is beegfs not included?
 
     # Put the client.conf files in /etc since they are needed
     # by the commandline need them 
@@ -334,7 +334,7 @@ in
 
     # generate fstab entries
     fileSystems = mapAttrs' (name: cfg:
-      (nameValuePair cfg.client.mountPoint (if cfg.client.mount then (mkIf cfg.client.enable {
+      (nameValuePair cfg.client.mountPoint (if cfg.client.mount then (mkIf cfg.client.enable { # you can use optionalAttrs instead of if .. then .. else {}
       device = "beegfs_nodev";
       fsType = "beegfs";
       mountPoint = cfg.client.mountPoint;
@@ -343,7 +343,7 @@ in
 
     # generate systemd services 
     systemd.services = systemdHelperd // 
-      foldr (a: b: a // b) {}
+      foldr (a: b: a // b) {} # I would exspect, there is already a helper function for it, but cool
         (map (x: systemdEntry x.service x.cfgFile) serviceList);
   };
 }
