@@ -8,7 +8,9 @@ symlinkJoin {
   nativeBuildInputs = [ makeWrapper ];
 
   postBuild = ''
-    wrapProgram $out/bin/vdr --add-flags "-L $out/lib/vdr --localedir=$out/share/locale"
+    wrapProgram $out/bin/vdr \
+      --add-flags "-L $out/lib/vdr --localedir=$out/share/locale" \
+      --suffix XINE_PLUGIN_PATH ":" $out/lib/xine/plugins
   '';
 
   meta = with vdr.meta; {
