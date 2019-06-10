@@ -1,0 +1,43 @@
+diff --git a/Listener.cpp b/Listener.cpp
+index c050b2c..f779715 100644
+--- a/Listener.cpp
++++ b/Listener.cpp
+@@ -37,7 +37,7 @@ namespace fritz{
+ 
+ Listener *Listener::me = nullptr;
+ 
+-Listener::Listener(EventHandler *event)
++Listener::Listener(EventHandler *event) : cancelRequested(false)
+ {
+ 	this->event = event;
+ 	thread = new std::thread(&Listener::run, this);
+@@ -47,7 +47,7 @@ Listener::~Listener()
+ {
+ 	if (thread) {
+ 		cancelThread();
+-		thread->join();
++		//thread->join();
+ 		delete thread;
+ 	}
+ }
+diff --git a/Listener.h b/Listener.h
+index 31b2ed1..29ffc87 100644
+--- a/Listener.h
++++ b/Listener.h
+@@ -22,6 +22,7 @@
+ #ifndef FRITZLISTENER_H
+ #define FRITZLISTENER_H
+ 
++#include <atomic>
+ #include <string>
+ #include <thread>
+ #include <vector>
+@@ -54,7 +55,7 @@ public:
+ 
+ class Listener {
+ private:
+-	bool cancelRequested = false;
++  std::atomic<bool> cancelRequested;
+ 	static Listener *me;
+ 	EventHandler *event;
+ 	std::vector<int> activeConnections;

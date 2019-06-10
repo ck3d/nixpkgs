@@ -295,6 +295,11 @@ in {
         rev = "ca19013c9451cbac7a90155b486ea9959ced0f67";
         sha256 = "0jk93zm3qzl9z96gfs6xl1c8ip8lckgbzibf7jay7dbgkg9kyjfg";
       };
+
+      patches = [
+        ./libfritzpp-fixCancelRequested.patch
+      ];
+
       installPhase = ''
         mkdir -p $out/lib $out/include/libfritz++
         cp source.a $out/lib/libfritz++.a
