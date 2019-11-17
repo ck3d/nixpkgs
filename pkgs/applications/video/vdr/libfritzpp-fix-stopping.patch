@@ -1,0 +1,24 @@
+From c1c7f93af3cc0f219aa792ca67432ae67d8fa580 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Christian=20K=C3=B6gler?= <christian.koegler@esg.de>
+Date: Sun, 17 Nov 2019 17:40:27 +0100
+Subject: [PATCH] fix stopping
+
+---
+ Listener.cpp | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/Listener.cpp b/Listener.cpp
+index c050b2c..9efd1d5 100644
+--- a/Listener.cpp
++++ b/Listener.cpp
+@@ -47,7 +47,6 @@ Listener::~Listener()
+ {
+ 	if (thread) {
+ 		cancelThread();
+-		thread->join();
+ 		delete thread;
+ 	}
+ }
+-- 
+2.23.0
+

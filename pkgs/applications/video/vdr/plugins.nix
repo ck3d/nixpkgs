@@ -290,6 +290,7 @@ in {
     libfritzpp = stdenv.mkDerivation {
       name = "jowi24-libfritzpp-20131201";
       CXXFLAGS = "-std=gnu++11 -Os";
+      patches = [ ./libfritzpp-fix-stopping.patch ];
       src = fetchFromGitHub {
         owner = "jowi24";
         repo = "libfritzpp";
