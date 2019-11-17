@@ -12,6 +12,8 @@
   };
 in {
 
+  iptv = callPackage ./iptv {};
+
   xineliboutput = callPackage ./xineliboutput {};
 
   skincurses = (mkPlugin "skincurses").overrideAttrs(oldAttr: {
