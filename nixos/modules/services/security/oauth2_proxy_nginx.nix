@@ -31,8 +31,10 @@ in
         proxyPass = cfg.proxy;
         extraConfig = ''
           proxy_set_header X-Scheme                $scheme;
-          proxy_set_header X-Auth-Request-Redirect $request_uri;
-        '';
+        '' + (if builtins.length cfg.virtualHosts > 1
+          then "proxy_set_header X-Auth-Request-Redirect $scheme://$host$request_uri;"
+          else "proxy_set_header X-Auth-Request-Redirect $request_uri;")
+        ;
       };
       locations."/oauth2/auth" = {
         proxyPass = cfg.proxy;
