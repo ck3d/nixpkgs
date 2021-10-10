@@ -5,25 +5,26 @@ let
     name = repo;
     owner = "tbsdtv";
     repo = "linux_media";
-    rev = "efe31531b77efd3a4c94516504a5823d31cdc776";
-    sha256 = "1533qi3sb91v00289hl5zaj4l35r2sf9fqc6z5ky1vbb7byxgnlr";
+    rev = "91b94c9ed5293cd54b03137d7e0038cf998aca6f"; # 2021-09-27
+    sha256 = "sha256-6bugR8d+Plhr/SqcYYa7Ilarr2zZ35SKTTS+HiANa3I=";
   };
 
   build = fetchFromGitHub rec {
     name = repo;
     owner = "tbsdtv";
     repo = "media_build";
-    rev = "a0d62eba4d429e0e9d2c2f910fb203e817cac84b";
-    sha256 = "1329s7w9xlqjqwkpaqsd6b5dmzhm97jw0c7c7zzmmbdkl289i4i4";
+    rev = "c6194cd34ce43f396378b49d256b5e7f339006c6"; # 2021-10-07
+    sha256 = "sha256-0rt76Xoj3rV8EYJ9olulr+Kxg6xGYmgGlr+XPayK988=";
   };
 
 in stdenv.mkDerivation {
   pname = "tbs";
-  version = "2018.04.18-${kernel.version}";
+  version = "2021.10.07-${kernel.version}";
 
   srcs = [ media build ];
   sourceRoot = build.name;
 
+  # https://github.com/tbsdtv/linux_media/wiki
   preConfigure = ''
     make dir DIR=../${media.name}
   '';
@@ -59,6 +60,5 @@ in stdenv.mkDerivation {
     license = licenses.gpl2;
     maintainers = with maintainers; [ ck3d ];
     priority = -1;
-    broken = lib.versionAtLeast kernel.version "4.18";
   };
 }
