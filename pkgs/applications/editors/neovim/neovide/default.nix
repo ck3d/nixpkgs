@@ -21,6 +21,8 @@
 , enableWayland ? stdenv.isLinux
 , wayland
 , xorg
+, darwin
+, xcbuild
 }:
 rustPlatform.buildRustPackage rec {
   pname = "neovide";
@@ -47,15 +49,20 @@ rustPlatform.buildRustPackage rec {
       # The externals for skia are taken from skia/DEPS
       externals = lib.mapAttrs (n: v: fetchgit v) (lib.importJSON ./skia-externals.json);
     in
-      runCommand "source" {} (
-        ''
-          cp -R ${repo} $out
-          chmod -R +w $out
+    runCommand "source" { nativeBuildInputs = [ python2 ]; } (
+      ''
+        cp -R ${repo} $out
+        chmod -R +w $out
 
-          mkdir -p $out/third_party/externals
-          cd $out/third_party/externals
-        '' + (builtins.concatStringsSep "\n" (lib.mapAttrsToList (name: value: "cp -ra ${value} ${name}") externals))
-      );
+        $out/tools/build_workaround_header.py \
+          --output-file $out/include/gpu/GrDriverBugWorkaroundsAutogen.h \
+          $out/src/gpu/gpu_workaround_list.txt
+
+        mkdir -p $out/third_party/externals
+        cd $out/third_party/externals
+      ''
+      + (builtins.concatStringsSep "\n" (lib.mapAttrsToList (name: value: "cp -ra ${value} ${name}") externals))
+    );
 
   SKIA_NINJA_COMMAND = "${ninja}/bin/ninja";
   SKIA_GN_COMMAND = "${gn}/bin/gn";
@@ -73,7 +80,9 @@ rustPlatform.buildRustPackage rec {
     makeWrapper
     python2 # skia-bindings
     llvmPackages.clang # skia
-  ];
+  ]
+  ++ lib.optional stdenv.isDarwin xcbuild
+  ;
 
   # All tests passes but at the end cargo prints for unknown reason:
   #   error: test failed, to rerun pass '--bin neovide'
@@ -96,18 +105,34 @@ rustPlatform.buildRustPackage rec {
         }))
       ];
     }))
-  ];
+  ]
+  ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
+    AppKit
+    ApplicationServices
+    Carbon
+    CoreFoundation
+    CoreGraphics
+    CoreVideo
+    Foundation
+    OpenGL
+    QuartzCore
+  ])
+  ;
 
-  postFixup = let
-    libPath = lib.makeLibraryPath ([
-      libglvnd
-      libxkbcommon
-      xorg.libXcursor
-      xorg.libXext
-      xorg.libXrandr
-      xorg.libXi
-    ] ++ lib.optionals enableWayland [ wayland ]);
-  in ''
+  postFixup =
+    let
+      libPath = lib.makeLibraryPath ([
+        libglvnd
+        libxkbcommon
+        xorg.libXcursor
+        xorg.libXext
+        xorg.libXrandr
+        xorg.libXi
+      ]
+      ++ lib.optional enableWayland wayland
+      );
+    in
+    ''
       wrapProgram $out/bin/neovide \
         --prefix LD_LIBRARY_PATH : ${libPath}
     '';
