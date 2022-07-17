@@ -28,6 +28,8 @@ let
     patches = [
       ./tag-date.patch
       ./setuptools-distutils-C++.patch
+    ]
+    ++ lib.optional (stdenv.hostPlatform != stdenv.buildPlatform)
       # Use sysconfigdata to find headers. Fixes cross-compilation of extension modules.
       # https://github.com/pypa/distutils/pull/145
       (fetchpatch {
@@ -36,7 +38,7 @@ let
         stripLen = 2;
         extraPrefix = "setuptools/_distutils/";
       })
-    ];
+    ;
 
     buildPhase = ''
       ${python.pythonForBuild.interpreter} setup.py egg_info
