@@ -39,6 +39,9 @@ import ./make-test-python.nix (
       # do not try to access cache.nixos.org
       nix.settings.substituters = lib.mkForce [ ];
 
+      # auto-start container
+      systemd.services."systemd-nspawn@${containerName}".wantedBy = [ "machines.target" ];
+
       virtualisation.additionalPaths = [ containerSystem ];
     };
 
@@ -73,6 +76,14 @@ import ./make-test-python.nix (
       # Test machinectl reboot
       machine.succeed("machinectl reboot ${containerName}");
       machine.wait_until_succeeds("systemctl -M ${containerName} is-active default.target");
+
+      # Restart machine
+      machine.shutdown()
+      machine.start()
+      machine.wait_for_unit("default.target");
+
+      # Test auto-start
+      machine.succeed("machinectl show ${containerName}")
 
       # Test machinectl stop
       machine.succeed("machinectl stop ${containerName}");
