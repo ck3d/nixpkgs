@@ -51,6 +51,7 @@ import ./make-test-python.nix (
       # Workaround for nixos-install
       machine.succeed("chmod o+rx /var/lib/machines");
       machine.succeed("nixos-install --root ${containerRoot} --system ${containerSystem} --no-channel-copy --no-root-passwd");
+      machine.succeed("mkdir -p ${containerRoot}/var/log/journal");
 
       # Allow systemd-nspawn to apply user namespace on immutable files
       machine.succeed("chattr -i ${containerRoot}/var/empty");
