@@ -193,7 +193,7 @@ in rec {
       # upstream unit.
       for i in ${toString (mapAttrsToList (n: v: v.unit) units)}; do
         fn=$(basename $i/*)
-        if [ -e $out/$fn ]; then
+        if [ -e $out/$fn ] || [[ "$fn" =~ @[^.]+\. ]]; then
           if [ "$(readlink -f $i/$fn)" = /dev/null ]; then
             ln -sfn /dev/null $out/$fn
           else
