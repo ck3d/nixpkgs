@@ -28,7 +28,7 @@ import ./make-test-python.nix (
   {
     name = "systemd-machinectl";
 
-    nodes.machine = { lib, ... }: {
+    nodes.machine = { lib, pkgs, config, ... }: {
       # use networkd to obtain systemd network setup
       networking.useNetworkd = true;
       networking.useDHCP = false;
@@ -43,6 +43,16 @@ import ./make-test-python.nix (
       systemd.services."systemd-nspawn@${containerName}".wantedBy = [ "machines.target" ];
 
       virtualisation.additionalPaths = [ containerSystem ];
+
+      # workaround for issue override systemd template
+      # https://github.com/NixOS/nixpkgs/issues/80933#issuecomment-922367301
+      systemd.packages = [
+        (pkgs.runCommandLocal "machines" { } ''
+          mkdir -p $out/etc/systemd/system/
+          cp ${config.systemd.package}/example/systemd/system/systemd-nspawn@.service \
+            $out/etc/systemd/system/systemd-nspawn@${containerName}.service
+        '')
+      ];
     };
 
     testScript = ''
